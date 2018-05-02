@@ -9,6 +9,7 @@ public class GemElement : MonoBehaviour
 	public float sideForce = .1f;
 	private Rigidbody rigidbody;
 	public GemElement instance;
+	public float RotationSpeed = 0f;
 
 	// Use this for initialization
 	private void Start ()
@@ -16,6 +17,12 @@ public class GemElement : MonoBehaviour
 		instance = this;
 		Debug.Log("AYO");
 		rigidbody = GetComponent<Rigidbody>();
+	}
+	
+	
+	private void FixedUpdate()
+	{
+		transform.Rotate(Vector3.forward, RotationSpeed * Time.deltaTime);
 	}
 
 
@@ -29,11 +36,13 @@ public class GemElement : MonoBehaviour
 
 		rigidbody.velocity = force;
 		rigidbody.useGravity = false;
+		RotationSpeed = Random.Range(0f, 20f);
 	}
 
 
 	public void LevitationOff()
 	{
 		rigidbody.useGravity = true;
+		RotationSpeed = 0f;
 	}
 }

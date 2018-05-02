@@ -14,9 +14,10 @@ public class ObjectPooler : MonoBehaviour {
 		public int size; 
 	}
 
-
+	
 	public List<Pool> pools;
 	public Dictionary<string, Queue<GameObject>> poolDictionary;
+	public float RotationSpeed = 0f;
 
 	
 	void Start()
@@ -35,6 +36,8 @@ public class ObjectPooler : MonoBehaviour {
 				var posY = Math.Cos((angle * Math.PI / 180)) * pool.radius;
 				
 				GameObject obj = Instantiate(pool.prefab);
+				// Push obj clones to ObjectPooler :)
+				obj.transform.parent = transform;
 				obj.SetActive(true);
 				obj.transform.position = new Vector3(ToSingle(posX), 0, ToSingle(posY));
 				objectPool.Enqueue(obj);
@@ -45,8 +48,17 @@ public class ObjectPooler : MonoBehaviour {
 	}
 
 
+	private void FixedUpdate()
+	{
+		transform.Rotate(Vector3.up, RotationSpeed * Time.deltaTime);
+	}
+
+
 	public void Levitate(string tag) {
 		if (!poolDictionary.ContainsKey(tag)) return;
+		
+		RotationSpeed = 5f;
+		
 		foreach (var pool in pools) {
 			for (var i = 0; i < pool.size; i++)
 			{
@@ -63,6 +75,9 @@ public class ObjectPooler : MonoBehaviour {
 	public void Gravitate(string tag)
 	{
 		if (!poolDictionary.ContainsKey(tag)) return;
+		
+		RotationSpeed = 0f;
+		
 		foreach (var pool in pools) {
 			for (var i = 0; i < pool.size; i++)
 			{
