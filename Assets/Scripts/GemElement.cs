@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class GemElement : MonoBehaviour
 {
@@ -9,7 +7,7 @@ public class GemElement : MonoBehaviour
 	public float sideForce = .1f;
 	private Rigidbody rigidbody;
 	public GemElement instance;
-	public float RotationSpeed = 0f;
+	private float RotationSpeed = 0f;
 
 	// Use this for initialization
 	private void Start ()

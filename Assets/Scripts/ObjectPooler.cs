@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -14,16 +13,30 @@ public class ObjectPooler : MonoBehaviour {
 		public int size; 
 	}
 
+
+	public GameObject gem;
+	private Vector3 gemPosition;
+	private Vector3 currentGemPosition;
+	
+	private bool isLevitate;
+	private bool isCurrentPositionSet;
+	
+	private float gemAmplitude = 5.0f;
+	private float gemOmega = 5.0f;
+	private float gemReplaceFraction = 0;
+	private float gemReplaceSpeed = 1f;
+	private float RotationSpeed = 0f;
 	
 	public List<Pool> pools;
 	public Dictionary<string, Queue<GameObject>> poolDictionary;
-	public float RotationSpeed = 0f;
+	
 
 	
 	void Start()
 	{
+		isLevitate = false;
+		gemPosition = gem.transform.position;
 		poolDictionary = new Dictionary<string, Queue<GameObject>>();
-
 		foreach (var pool in pools)
 		{
 			var objectPool = new Queue<GameObject>();
@@ -51,15 +64,39 @@ public class ObjectPooler : MonoBehaviour {
 	private void FixedUpdate()
 	{
 		transform.Rotate(Vector3.up, RotationSpeed * Time.deltaTime);
+
+		if (isLevitate)
+		{			
+			var newGemPosition = gem.transform.position;
+			newGemPosition.y += Mathf.Cos(Time.time) * Time.deltaTime;
+			gem.transform.position = newGemPosition ;
+			
+		} else {
+
+			if (!isCurrentPositionSet) {
+				currentGemPosition = gem.transform.position;
+				isCurrentPositionSet = true;
+			}
+
+
+			if (!(gemReplaceFraction < 1)) return;
+			gemReplaceFraction += Time.deltaTime * gemReplaceSpeed;
+			gem.transform.position = Vector3.Lerp(currentGemPosition, gemPosition, gemReplaceFraction);
+		}
+		
 	}
 
 
 	public void Levitate(string tag) {
 		if (!poolDictionary.ContainsKey(tag)) return;
-		
+
+		isLevitate = true;
+		isCurrentPositionSet = false;
+		gemReplaceFraction = 0;
 		RotationSpeed = 5f;
 		
-		foreach (var pool in pools) {
+		foreach (var pool in pools) 
+		{
 			for (var i = 0; i < pool.size; i++)
 			{
 				var objectToSpawn = poolDictionary[tag].Dequeue();
@@ -75,10 +112,12 @@ public class ObjectPooler : MonoBehaviour {
 	public void Gravitate(string tag)
 	{
 		if (!poolDictionary.ContainsKey(tag)) return;
-		
+
+		isLevitate = false;
 		RotationSpeed = 0f;
 		
-		foreach (var pool in pools) {
+		foreach (var pool in pools) 
+		{
 			for (var i = 0; i < pool.size; i++)
 			{
 				var objectToSpawn = poolDictionary[tag].Dequeue();
@@ -88,7 +127,6 @@ public class ObjectPooler : MonoBehaviour {
 			}
 		}
 	}
-	
 
 	
 	private static float ToSingle(double value)
